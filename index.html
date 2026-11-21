@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unit Economics &amp; Break-even (CAC / LTV / Break-even)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <div class="brand-badge">UE</div>
+        <div>
+          <h1 data-i18n="appTitle">Unit Economics &amp; Break-even</h1>
+          <p class="subtitle" data-i18n="appSubtitle">Interactive calculator for CAC, LTV, contribution margin, and break-even point</p>
+        </div>
+      </div>
+
+      <div class="topbar-controls">
+        <div class="presets" role="group" aria-label="Business model presets">
+          <button type="button" class="btn btn-preset active" data-preset="saas" data-i18n="presetSaas">SaaS</button>
+          <button type="button" class="btn btn-preset" data-preset="ecom" data-i18n="presetEcom">E-commerce</button>
+          <button type="button" class="btn btn-preset" data-preset="service" data-i18n="presetService">Service</button>
+        </div>
+
+        <label class="select-wrap" title="Interface language">
+          <select id="langSelect" aria-label="Language selector">
+            <option value="en" selected>EN</option>
+            <option value="ru">RU</option>
+            <option value="hy">HY</option>
+          </select>
+        </label>
+
+        <div class="fx-box" title="Exchange rate to USD and auto conversion">
+          <label class="select-wrap">
+            <select id="currencySelect" aria-label="Currency selector">
+              <option value="$" selected>$ USD</option>
+              <option value="€">€ EUR</option>
+              <option value="₽">₽ RUB</option>
+              <option value="֏">֏ AMD</option>
+            </select>
+          </label>
+          <span class="fx-label" data-i18n="fxRateLabel">Rate to $:</span>
+          <input type="number" id="fxRateInput" class="fx-input" min="0.0001" step="0.01" value="1" aria-label="Exchange rate to USD" />
+          <label class="fx-check" title="Convert values automatically when switching currency">
+            <input type="checkbox" id="autoConvertFx" checked />
+            <span data-i18n="fxAutoLabel">Auto</span>
+          </label>
+        </div>
+
+        <button type="button" id="infoBtn" class="btn btn-info" title="Guide and instructions">
+          <span>ℹ️</span> <span data-i18n="infoBtnText">Info</span>
+        </button>
+
+        <button type="button" id="themeToggle" class="btn btn-icon" title="Toggle theme" aria-label="Toggle theme">
+          <span id="themeIcon">☀️</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-grid">
+    <!-- Left column: Inputs -->
+    <aside class="panel inputs-panel">
+      <div class="panel-header">
+        <h2 data-i18n="paramsTitle">Model Parameters</h2>
+        <button type="button" id="resetBtn" class="btn btn-ghost" data-i18n="resetBtn">Reset</button>
+      </div>
+
+      <section class="input-group">
+        <h3 data-i18n="secAcquisition">1. Acquisition &amp; Traffic</h3>
+
+        <div class="field">
+          <div class="field-label">
+            <label for="marketingBudget" data-i18n="lblBudget">Marketing Budget / mo</label>
+            <span class="unit-tag" data-currency>$</span>
+          </div>
+          <div class="field-control">
+            <input type="number" id="marketingBudget" min="0" step="50" value="3000" />
+            <input type="range" id="marketingBudgetRange" min="0" max="25000" step="100" value="3000" />
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <label for="leadsCount" data-i18n="lblLeads">Leads / Inquiries</label>
+            <span class="unit-tag" data-i18n="unitPcs">pcs</span>
+          </div>
+          <div class="field-control">
+            <input type="number" id="leadsCount" min="1" step="10" value="1200" />
+            <input type="range" id="leadsCountRange" min="10" max="10000" step="10" value="1200" />
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <label for="conversionRate" data-i18n="lblCr">Conversion Rate (CR)</label>
+            <span class="unit-tag">%</span>
+          </div>
+          <div class="field-control">
+            <input type="number" id="conversionRate" min="0.1" max="100" step="0.1" value="10" />
+            <input type="range" id="conversionRateRange" min="0.5" max="50" step="0.5" value="10" />
+          </div>
+        </div>
+      </section>
+
+      <section class="input-group">
+        <h3 data-i18n="secMonetization">2. Monetization &amp; Retention</h3>
+
+        <div class="field">
+          <div class="field-label">
+            <label for="avgCheck" data-i18n="lblAov">Average Order Value (AOV)</label>
+            <span class="unit-tag" data-currency>$</span>
+          </div>
+          <div class="field-control">
+            <input type="number" id="avgCheck" min="0" step="5" value="50" />
+            <input type="range" id="avgCheckRange" min="1" max="1500" step="5" value="50" />
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <label for="repeatPurchases" data-i18n="lblApc">Purchases per Customer (APC / mo)</label>
+            <span class="unit-tag" data-i18n="unitTimes">times</span>
+          </div>
+          <div class="field-control">
+            <input type="number" id="repeatPurchases" min="0.1" step="0.1" value="1.0" />
+            <input type="range" id="repeatPurchasesRange" min="0.5" max="10" step="0.1" value="1.0" />
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <label for="lifetimeMonths" data-i18n="lblLifetime">Customer Lifetime</label>
+            <span class="unit-tag" data-i18n="unitMonths">mo</span>
+          </div>
+          <div class="field-control">
+            <input type="number" id="lifetimeMonths" min="1" max="120" step="1" value="8" />
+            <input type="range" id="lifetimeMonthsRange" min="1" max="60" step="1" value="8" />
+          </div>
+        </div>
+      </section>
+
+      <section class="input-group">
+        <h3 data-i18n="secCosts">3. Costs (COGS &amp; OPEX)</h3>
+
+        <div class="field">
+          <div class="field-label">
+            <label for="cogsPercent" data-i18n="lblCogs">Variable Costs (COGS)</label>
+            <span class="unit-tag" data-i18n="unitOfCheck">% of AOV</span>
+          </div>
+          <div class="field-control">
+            <input type="number" id="cogsPercent" min="0" max="99" step="1" value="20" />
+            <input type="range" id="cogsPercentRange" min="0" max="90" step="1" value="20" />
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <label for="fixedCosts" data-i18n="lblOpex">Fixed Costs (OPEX / mo)</label>
+            <span class="unit-tag" data-currency>$</span>
+          </div>
+          <div class="field-control">
+            <input type="number" id="fixedCosts" min="0" step="100" value="4500" />
+            <input type="range" id="fixedCostsRange" min="0" max="35000" step="100" value="4500" />
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Right column: Analytics, KPIs, Charts, Table -->
+    <div class="dashboard-content">
+      <div id="healthBanner" class="health-banner status-good">
+        <div class="health-info">
+          <span class="health-dot"></span>
+          <div>
+            <strong id="healthTitle">Healthy Unit Economics &amp; Operating Profit</strong>
+            <p id="healthDesc">LTV/CAC = 10.67x (target ≥ 3x), business operates above the break-even point.</p>
+          </div>
+        </div>
+        <div class="export-actions">
+          <button type="button" id="copyReportBtn" class="btn btn-secondary" data-i18n="btnCopy">Copy Report</button>
+          <button type="button" id="exportCsvBtn" class="btn btn-secondary">CSV</button>
+          <button type="button" id="exportJsonBtn" class="btn btn-secondary">JSON</button>
+        </div>
+      </div>
+
+      <section class="kpi-grid">
+        <article class="kpi-card">
+          <span class="kpi-title" data-i18n="kpiCacTitle">CAC (Customer Acquisition Cost)</span>
+          <div class="kpi-value" id="kpiCac">$25</div>
+          <span class="kpi-sub" id="kpiCpl">CPL: $3 • Customers: 120.0</span>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-title" data-i18n="kpiLtvTitle">LTV (Customer Gross Profit)</span>
+          <div class="kpi-value" id="kpiLtv">$320</div>
+          <span class="kpi-sub" id="kpiRevenuePerUser">LTV Revenue: $400</span>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-title">LTV / CAC</span>
+          <div class="kpi-value" id="kpiRatio">12.80x</div>
+          <span class="kpi-sub" id="kpiPayback">CAC Payback: 0.63 mo</span>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-title" data-i18n="kpiBepTitle">Break-even Point</span>
+          <div class="kpi-value" id="kpiBepUnits">188 sales</div>
+          <span class="kpi-sub" id="kpiBepRevenue">BEP Revenue: $9,375</span>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-title" data-i18n="kpiContribTitle">Contribution Margin / mo</span>
+          <div class="kpi-value" id="kpiContribution">$4,800</div>
+          <span class="kpi-sub" id="kpiMarginPercent">Margin: 80.0% ($40/unit)</span>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-title" data-i18n="kpiProfitTitle">Net Profit / mo (EBITDA)</span>
+          <div class="kpi-value" id="kpiNetProfit">-$2,700</div>
+          <span class="kpi-sub" id="kpiSafetyMargin">Margin of safety: -56.3%</span>
+        </article>
+      </section>
+
+      <section class="charts-grid">
+        <div class="panel chart-card">
+          <div class="panel-header">
+            <h3 data-i18n="chartBepTitle">Break-even Analysis Chart</h3>
+            <span class="badge" data-i18n="chartBepBadge">Revenue vs Costs</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="bepChart"></canvas>
+          </div>
+        </div>
+
+        <div class="panel chart-card">
+          <div class="panel-header">
+            <h3 data-i18n="chartLtvTitle">Cohort Payback (CAC vs LTV)</h3>
+            <span class="badge" data-i18n="chartLtvBadge">By Customer Lifetime</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="ltvChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel table-panel">
+        <div class="panel-header">
+          <h3 data-i18n="tableTitle">Breakdown &amp; Sensitivity Formulas</h3>
+          <span class="badge" data-i18n="tableBadge">Formulas Summary</span>
+        </div>
+        <div class="table-responsive">
+          <table class="metrics-table">
+            <thead>
+              <tr>
+                <th data-i18n="thMetric">Metric</th>
+                <th data-i18n="thFormula">Formula</th>
+                <th data-i18n="thCurrent">Current Value</th>
+                <th data-i18n="thTarget">Target Benchmark</th>
+              </tr>
+            </thead>
+            <tbody id="summaryTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="infoModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modalTitle" data-i18n="modalTitle">Unit Economics Guide &amp; Instructions</h2>
+        <button type="button" id="closeModalBtn" class="btn btn-icon" aria-label="Close">✕</button>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" id="modalOkBtn" class="btn btn-primary" data-i18n="modalCloseBtn">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <span>(C) Karlos Hakobyan</span>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
